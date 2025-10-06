@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>A.R.I.A. - Misión Andrómeda</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: monospace;
+      text-align: center;
+      background: url('descarga.gif') no-repeat center center fixed;
+      background-size: cover;
+      color: #b3d9ff;
+    }
+    h1 {
+      margin-top: 40px;
+      font-size: 5.5em;
+      text-shadow: 0 0 15px #66ccff;
+      color: #ffffff;
+    }
+    #consola {
+      margin-top: 40px;
+      font-size: 3em;
+      text-shadow: 0 0 10px #66ccff;
+      background: rgba(0, 31, 63, 0.6);
+      display: inline-block;
+      padding: 20px 30px;
+      border-radius: 12px;
+      border: 1px solid #003366;
+    }
+    button {
+      margin-top: 25px;
+      padding: 20px 30px;
+      font-size: 2.4em;
+      background: #001f3f;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #003366;
+    }
+    button:hover {
+      background: #003366;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛰️ A.R.I.A. - Misión Andrómeda</h1>
+  <div id="consola">Di <b>"Hola A.R.I.A."</b> para iniciar.</div>
+  <br>
+  <button onclick="iniciarEscucha()">🎤 Activar micrófono</button>
+
+  <script>
+    const consola = document.getElementById("consola");
+
+    // Función para que A.R.I.A. "hable"
+    function ariaHabla(texto) {
+      consola.innerHTML = texto;
+      const speech = new SpeechSynthesisUtterance(texto);
+      speech.lang = "es-ES";  
+      speech.rate = 0.9;     
+      speech.pitch = 1;     
+      speech.volume = 1;
+
+      // Elegir voz femenina española
+      const voces = speechSynthesis.getVoices();
+      const vozEspañola = voces.find(v =>
+        v.lang.includes("es-ES") &&
+        (v.name.toLowerCase().includes("female") ||
+         v.name.toLowerCase().includes("mujer") ||
+         v.name.toLowerCase().includes("woman") ||
+         v.name.toLowerCase().includes("google") ||
+         v.name.toLowerCase().includes("microsoft"))
+      );
+
+      if (vozEspañola) {
+        speech.voice = vozEspañola;
+      }
+
+      speechSynthesis.speak(speech);
+    }
+
+    // Reconocimiento de voz
+    function iniciarEscucha() {
+      const reconocimiento = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      reconocimiento.lang = "es-ES"; // para detectar mejor pronunciación española
+      reconocimiento.start();
+
+      reconocimiento.onstart = function() {
+        consola.innerHTML = "🎧 Escuchando...";
+      };
+
+      reconocimiento.onresult = function(event) {
+        const resultado = event.results[0][0].transcript.toLowerCase().trim();
+        consola.innerHTML = "🎤 Tú dijiste: " + resultado;
+
+        // Variantes por si interpreta mal
+        if (resultado.includes("hola aria") || 
+            resultado.includes("hola a.r.i.a") || 
+            resultado.includes("hola area") ||
+            resultado.includes("hola haria")) {
+          
+          ariaHabla("Saludos, explorador. Nos encontramos en la constelación de Andrómeda. Verifica que todos los sistemas estén operativos antes de continuar.");
+        
+        } else {
+          ariaHabla("No entendí el comando. Intenta decir Hola A.R.I.A.");
+        }
+      };
+
+      reconocimiento.onerror = function(event) {
+        consola.innerHTML = "❌ Error de reconocimiento: " + event.error;
+      };
+
+      reconocimiento.onend = function() {
+        consola.innerHTML += "<br>✅ Micrófono desactivado.";
+      };
+    }
+
+    // Precargar voces (necesario en algunos navegadores)
+    window.speechSynthesis.onvoiceschanged = () => {};
+  </script>
+</body>
+</html>
